@@ -25,7 +25,19 @@ const config = {
             template: './index.html'
         }),
         new CleanWebpackPlugin()
-    ]
+    ],
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader']
+            },
+            {
+                test: /\.(png|svg|gif)$/,
+                use: ['file-loader']
+            }
+        ]
+    }
 }
 
 export default config

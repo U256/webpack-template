@@ -1,0 +1,13 @@
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.logo {
+    background-image: url("../assets/img1.png");
+    background-size: cover;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
