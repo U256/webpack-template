@@ -1,15 +1,14 @@
-import _ from 'lodash'
+import lodashJoin from 'lodash/join.js'
+import Post from "./Post.js"
 
-// "npx webpack" работает без webpack.config.js 
-// Это дефолтная сборка
+const post1 = new Post('post 1')
 
-// post not defined
-const Post = new Post('post 1')
+// console.log({post1})
 
 function component() {
    const element = document.createElement('div')
 
-   element.innerHTML = _.join(['Hello', 'webpack'], ' ')
+   element.innerHTML = lodashJoin(['Hello', 'webpack'], ' ')
 
    return element
 }

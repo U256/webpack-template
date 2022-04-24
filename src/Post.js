@@ -1,3 +1,5 @@
+'use strict'
+
 class Post {
     constructor(title) {
         this.title = title;
