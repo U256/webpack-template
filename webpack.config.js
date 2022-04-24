@@ -3,7 +3,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin'
 import CopyWebpackPlugin from 'copy-webpack-plugin'
 import TerserWebpackPlugin from 'terser-webpack-plugin'
 import CssMinimizerWebpackPlugin from 'css-minimizer-webpack-plugin'
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import {CleanWebpackPlugin} from 'clean-webpack-plugin'
 import {fileURLToPath} from 'url'
 
@@ -12,7 +12,7 @@ const isProd = process.env.NODE_ENV === 'production'
 const { dirname, resolve } = path
 const __filename = fileURLToPath(import.meta.url)
 
-const optimization = () => {
+const getOptimizationConfig = () => {
      const cfg = {
         splitChunks: {
             chunks: 'all'
@@ -28,16 +28,30 @@ const optimization = () => {
 
     return cfg;
 }
+const generateFilename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`
+const generateCssLoader = (extra) => {
+    const loaders = [
+        MiniCssExtractPlugin.loader,
+        'css-loader',
+        'sass-loader'
+    ]
+
+    if (extra) {
+        loaders.push(extra)
+    }
+
+    return loaders
+}
 
 const config = {
     context: resolve(dirname(__filename), 'src'),
     mode: 'development',
     entry: {
-        main: './index.js',
+        main: ['@babel/polyfill', './index.js'],
 
     },
     output: {
-        filename: 'bundle.[contenthash].js',
+        filename: generateFilename('js'),
         path: resolve(dirname(__filename), 'dist')
     },
     resolve: {
@@ -46,7 +60,7 @@ const config = {
             '@src': resolve(dirname(__filename), 'src')
         }
     },
-    optimization: optimization(),
+    optimization: getOptimizationConfig(),
     devServer: {
         port: 4200,
         hot: isDev
@@ -68,17 +82,18 @@ const config = {
             ]
         }),
         new MiniCssExtractPlugin({
-            filename: '[name].[contenthash].css',
+            filename: generateFilename('css')
         })
     ],
     module: {
         rules: [
             {
                 test: /\.css$/,
-                use: [
-                    MiniCssExtractPlugin.loader,
-                    'css-loader'
-                ]
+                use: generateCssLoader()
+            },
+            {
+                test: /\.s[ac]ss$/,
+                use: generateCssLoader('sass-loader')
             },
             {
                 test: /\.(woff|woff2|ttf)$/,
@@ -87,6 +102,22 @@ const config = {
             {
                 test: /\.(png|svg|gif|jpg|jpeg)$/i,
                 type: 'asset/resource'
+            },
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: [[
+                            "@babel/preset-env",
+                            {
+                                "useBuiltIns": "usage",
+                                "corejs": 2
+                            }
+                        ]]
+                    }
+                }
             }
         ]
     }

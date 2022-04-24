@@ -1,6 +1,8 @@
 import lodashJoin from 'lodash/join.js'
+import delay from 'delay'
 import Post from "./Post.js"
 import './styles/styles.css';
+import './styles/test.scss';
 import json from './assets/json.json'
 import img1 from './assets/img1.png'
 
@@ -15,5 +17,19 @@ function component() {
 
    return element
 }
+
+const delayer = async () => {
+   await delay(1000)
+
+   return 'done'
+}
+
+(async function () {
+   const result1 = await delayer();
+
+   console.log(result1)
+})()
+
+
 
 document.body.appendChild(component())
