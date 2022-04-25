@@ -42,6 +42,30 @@ const generateCssLoader = (extra) => {
 
     return loaders
 }
+const generateJsLoader = (additionalPreset) => {
+    let loaders = {
+        loader: "babel-loader",
+        options: {
+            presets: [[
+                "@babel/preset-env",
+                {
+                    "useBuiltIns": "usage",
+                    "corejs": 2
+                }
+            ]]
+        }
+    }
+
+    if (additionalPreset) {
+        loaders.options.presets.push(additionalPreset)
+    }
+
+    // if (isDev) {
+    //     loaders.options.presets.push('eslint-loader')
+    // }
+
+    return loaders;
+}
 
 const config = {
     context: resolve(dirname(__filename), 'src'),
@@ -65,9 +89,11 @@ const config = {
         port: 4200,
         hot: isDev
     },
+    devtool: isDev ? 'source-map' : '',
     plugins: [
         new HtmlWebpackPlugin({
             template: './index.html',
+            inject: 'body',
             minify: {
                 collapseWhitespace: isProd
             }
@@ -97,7 +123,7 @@ const config = {
             },
             {
                 test: /\.(woff|woff2|ttf)$/,
-                use: ['file-loader']
+                type: 'asset/resource'
             },
             {
                 test: /\.(png|svg|gif|jpg|jpeg)$/i,
@@ -106,18 +132,17 @@ const config = {
             {
                 test: /\.m?js$/,
                 exclude: /node_modules/,
-                use: {
-                    loader: "babel-loader",
-                    options: {
-                        presets: [[
-                            "@babel/preset-env",
-                            {
-                                "useBuiltIns": "usage",
-                                "corejs": 2
-                            }
-                        ]]
-                    }
-                }
+                use: generateJsLoader()
+            },
+            {
+                test: /\.m?ts$/,
+                exclude: /node_modules/,
+                use: generateJsLoader('@babel/preset-typescript')
+            },
+            {
+                test: /\.m?jsx$/,
+                exclude: /node_modules/,
+                use: generateJsLoader('@babel/preset-react')
             }
         ]
     }
