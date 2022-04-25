@@ -1,0 +1,13 @@
+$border: 1px solid #bbb;
+
+.sass-test {
+  padding: 10px;
+  width: 100%;
+  border: $border;
+  margin: 20px;
+
+  p {
+    color: #104945;
+    font-size: 30px;
+  }
+}
