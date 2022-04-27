@@ -111,8 +111,7 @@ const config = {
         port: 4200,
         hot: isDev
     },
-    // Вернуть!!!
-    // devtool: isDev ? 'source-map' : undefined,
+    devtool: isDev ? 'source-map' : undefined,
     plugins: [
         new CleanWebpackPlugin(),
         new CopyWebpackPlugin({
