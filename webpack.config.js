@@ -1,17 +1,39 @@
 import path from 'path'
+import fs from 'fs-extra'
+import {fileURLToPath} from 'url'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import CopyWebpackPlugin from 'copy-webpack-plugin'
 import TerserWebpackPlugin from 'terser-webpack-plugin'
 import CssMinimizerWebpackPlugin from 'css-minimizer-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import {CleanWebpackPlugin} from 'clean-webpack-plugin'
-import {fileURLToPath} from 'url'
 
 const isDev = process.env.NODE_ENV === 'development'
 const isProd = process.env.NODE_ENV === 'production'
 const { dirname, resolve } = path
 const __filename = fileURLToPath(import.meta.url)
 
+const generatePath = (template = 'src') => resolve(dirname(__filename), template)
+
+const pluginsForHtmlPages = fs
+    .readdirSync(generatePath())
+    .reduce((plugins, fullName) => {
+        const [name, extension] = fullName.split('.')
+
+        if (extension === 'html')
+            return [
+                ...plugins,
+                new HtmlWebpackPlugin({
+                    filename: `${name}.html`,
+                    inject: 'body',
+                    minify: {
+                        collapseWhitespace: isProd
+                    },
+                })
+            ]
+
+        return plugins
+    }, [])
 const getOptimizationConfig = () => {
      const cfg = {
         splitChunks: {
@@ -26,7 +48,7 @@ const getOptimizationConfig = () => {
         ]
     }
 
-    return cfg;
+    return cfg
 }
 const generateFilename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`
 const generateCssLoader = (extra) => {
@@ -64,24 +86,24 @@ const generateJsLoader = (additionalPreset) => {
     //     loaders.options.presets.push('eslint-loader')
     // }
 
-    return loaders;
+    return loaders
 }
 
 const config = {
-    context: resolve(dirname(__filename), 'src'),
+    context: generatePath(),
     mode: 'development',
     entry: {
-        main: ['@babel/polyfill', './index.js'],
+        main: ['@babel/polyfill', './js/index.js'],
 
     },
     output: {
         filename: generateFilename('js'),
-        path: resolve(dirname(__filename), 'dist')
+        path: generatePath('dist')
     },
     resolve: {
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.png', '.jpg'],
         alias: {
-            '@src': resolve(dirname(__filename), 'src')
+            'src': generatePath()
         }
     },
     optimization: getOptimizationConfig(),
@@ -89,15 +111,9 @@ const config = {
         port: 4200,
         hot: isDev
     },
-    devtool: isDev ? 'source-map' : '',
+    // Вернуть!!!
+    // devtool: isDev ? 'source-map' : undefined,
     plugins: [
-        new HtmlWebpackPlugin({
-            template: './index.html',
-            inject: 'body',
-            minify: {
-                collapseWhitespace: isProd
-            }
-        }),
         new CleanWebpackPlugin(),
         new CopyWebpackPlugin({
             patterns: [
@@ -110,7 +126,7 @@ const config = {
         new MiniCssExtractPlugin({
             filename: generateFilename('css')
         })
-    ],
+    ].concat(pluginsForHtmlPages),
     module: {
         rules: [
             {

@@ -11,7 +11,7 @@ class Post {
         JSON.stringify({
             title: this.title,
             date: this.date.toJSON(),
-            date: this.img || undefined
+            image: this.img || undefined
         })
     }
 }

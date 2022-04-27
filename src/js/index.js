@@ -1,11 +1,11 @@
 import lodashJoin from 'lodash/join.js'
 import delay from 'delay'
+import 'src/styles/styles.css';
+import 'src/styles/test.scss';
+import json from 'src/assets/json.json'
+import img1 from 'src/assets/img1.png'
 import Post from "./Post.js"
 import { objectForTest } from "./typescriptTest.ts"
-import './styles/styles.css';
-import './styles/test.scss';
-import json from './assets/json.json'
-import img1 from './assets/img1.png'
 
 const post1 = new Post('post 1')
 
