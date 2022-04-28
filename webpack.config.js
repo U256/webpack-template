@@ -7,6 +7,7 @@ import TerserWebpackPlugin from 'terser-webpack-plugin'
 import CssMinimizerWebpackPlugin from 'css-minimizer-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import {CleanWebpackPlugin} from 'clean-webpack-plugin'
+import HtmlReplaceWebpackPlugin from 'html-replace-webpack-plugin'
 import SpriteLoaderPlugin from 'svg-sprite-loader/plugin.js'
 
 const isDev = process.env.NODE_ENV === 'development'
@@ -131,8 +132,20 @@ const config = {
         }),
         new SpriteLoaderPlugin({
             plainSprite: true
-        })
-    ].concat(pluginsForHtmlPages),
+        }),
+        new HtmlReplaceWebpackPlugin([
+            {
+                pattern: /(<!--\s*t:\s*[a-zA-Z]+\s*-->)/g,
+                replacement: (match) => {
+                    const finderRegexp = new RegExp('(?<=\\s*t:\\s*)[a-zA-Z]+')
+                    const value = (finderRegexp.exec(match) || [])[0]
+
+                    return `<%= require(\'html-loader!./templates/${value}.html\').default %>`
+                }
+            }
+        ]),
+        ...pluginsForHtmlPages
+    ],
     module: {
         rules: [
             {

@@ -32,6 +32,9 @@ function component() {
 
 document.body.appendChild(component())
 
+console.log(test1('str'))
+console.log('src')
+
 /**
  * dynamic import
  * */
