@@ -6,6 +6,10 @@ import json from 'src/assets/json.json'
 import img1 from 'src/assets/img1.png'
 import Post from "./Post.js"
 import { objectForTest } from "./typescriptTest.ts"
+/*
+* Loads all svg to make sprite
+* */
+import * as svg from 'src/svg'
 
 const post1 = new Post('post 1')
 
@@ -20,23 +24,20 @@ function component() {
    return element
 }
 
-const delayer = async () => {
-   await delay(1000)
-
-   return 'done'
-}
-
 (async function () {
-   const result1 = await delayer();
+   await delay(1000);
 
-   console.log(result1)
+   console.log('async done')
 })()
 
 document.body.appendChild(component())
 
+console.log(test1('str'))
+console.log('src')
+
 /**
  * dynamic import
  * */
-import('lodash').then(_ => {
-   console.log("lodash", _.random(0, 42, false))
+import('lodash/random').then(random => {
+   console.log("lodash", random(0, 42, false))
 })

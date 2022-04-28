@@ -7,6 +7,8 @@ import TerserWebpackPlugin from 'terser-webpack-plugin'
 import CssMinimizerWebpackPlugin from 'css-minimizer-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import {CleanWebpackPlugin} from 'clean-webpack-plugin'
+import HtmlReplaceWebpackPlugin from 'html-replace-webpack-plugin'
+import SpriteLoaderPlugin from 'svg-sprite-loader/plugin.js'
 
 const isDev = process.env.NODE_ENV === 'development'
 const isProd = process.env.NODE_ENV === 'production'
@@ -15,16 +17,19 @@ const __filename = fileURLToPath(import.meta.url)
 
 const generatePath = (template = 'src') => resolve(dirname(__filename), template)
 
+// TODO: handle html templates & image optimization
+
 const pluginsForHtmlPages = fs
     .readdirSync(generatePath())
-    .reduce((plugins, fullName) => {
-        const [name, extension] = fullName.split('.')
+    .reduce((plugins, fileName) => {
+        const [_, extension] = fileName.split('.')
 
         if (extension === 'html')
             return [
                 ...plugins,
                 new HtmlWebpackPlugin({
-                    filename: `${name}.html`,
+                    template: fileName,
+                    filename: fileName,
                     inject: 'body',
                     minify: {
                         collapseWhitespace: isProd
@@ -101,7 +106,7 @@ const config = {
         path: generatePath('dist')
     },
     resolve: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx', '.png', '.jpg'],
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
         alias: {
             'src': generatePath()
         }
@@ -124,8 +129,23 @@ const config = {
         }),
         new MiniCssExtractPlugin({
             filename: generateFilename('css')
-        })
-    ].concat(pluginsForHtmlPages),
+        }),
+        new SpriteLoaderPlugin({
+            plainSprite: true
+        }),
+        new HtmlReplaceWebpackPlugin([
+            {
+                pattern: /(<!--\s*t:\s*[a-zA-Z]+\s*-->)/g,
+                replacement: (match) => {
+                    const finderRegexp = new RegExp('(?<=\\s*t:\\s*)[a-zA-Z]+')
+                    const value = (finderRegexp.exec(match) || [])[0]
+
+                    return `<%= require(\'html-loader!./templates/${value}.html\').default %>`
+                }
+            }
+        ]),
+        ...pluginsForHtmlPages
+    ],
     module: {
         rules: [
             {
@@ -141,16 +161,37 @@ const config = {
                 type: 'asset/resource'
             },
             {
-                test: /\.(png|svg|gif|jpg|jpeg)$/i,
+                test: /\.(png|gif|jpg|jpeg)$/i,
                 type: 'asset/resource'
             },
             {
+                test: /\.svg$/,
+                use: [
+                    {
+                        loader: 'svg-sprite-loader',
+                        options: {
+                            extract: true,
+                            spriteFilename: 'icons.svg'
+
+                        }
+                    },
+                    'svg-transform-loader',
+                    'svgo-loader'
+                ]
+            },
+            {
                 test: /\.m?js$/,
+                resolve: {
+                    fullySpecified: false
+                },
                 exclude: /node_modules/,
                 use: generateJsLoader()
             },
             {
                 test: /\.m?ts$/,
+                resolve: {
+                    fullySpecified: false
+                },
                 exclude: /node_modules/,
                 use: generateJsLoader('@babel/preset-typescript')
             },
