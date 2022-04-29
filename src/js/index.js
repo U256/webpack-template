@@ -3,7 +3,7 @@ import delay from 'delay'
 import 'src/styles/styles.css';
 import 'src/styles/test.scss';
 import json from 'src/assets/json.json'
-import img1 from 'src/assets/img1.png'
+import img1 from 'src/images/img1.png'
 import Post from "./Post.js"
 import { objectForTest } from "./typescriptTest.ts"
 /*
@@ -32,7 +32,6 @@ function component() {
 
 document.body.appendChild(component())
 
-console.log(test1('str'))
 console.log('src')
 
 /**
